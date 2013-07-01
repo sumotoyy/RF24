@@ -1,6 +1,7 @@
 # Arduino & Raspberry Pi driver for nRF24L01(+) 2.4GHz Wireless Transceiver
 
 This version has been forked from the original maniacsbug and modified for working with Arduino and Teensy3.
+
 Design Goals: 
 
 * Maximally compliant with the intended operation of the chip
