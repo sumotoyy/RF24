@@ -3,7 +3,7 @@
 This version has been forked from the original maniacsbug and modified for working with Arduino and Teensy3.
 In the library config file there's an option for enable/disable all print features and save space. The option is:
 
-#define PRINTFENABLED
+<code>#define PRINTFENABLED</code>
 
 Comment out will disable all printouts from library in arduino and teensy.
 Modified a little bit the original maniacsbug examples to ensure compatibility with Teensy3. The printf.h file included
@@ -11,7 +11,7 @@ in every example has changed and the original example just need this line added:
 
 
 This is needed just for printf, if you don't use printf in your code the library works as is, yust remember to comment out
-#define PRINTFENABLED in library config file to save a lot of space/ram.
+<code>#define PRINTFENABLED</code> in library config file to save a lot of space/ram.
 
 Design Goals: 
 
