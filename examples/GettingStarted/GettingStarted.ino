@@ -7,12 +7,17 @@
  */
 
 /**
- * Example using Dynamic Payloads 
+ * Example for Getting Started with nRF24L01+ radios. 
  *
- * This is an example of how to use payloads of a varying (dynamic) size. 
+ * This is an example of how to use the RF24 class.  Write this sketch to two 
+ * different nodes.  Put one of the nodes into 'transmit' mode by connecting 
+ * with the serial monitor and sending a 'T'.  The ping node sends the current 
+ * time to the pong node, which responds by sending the value back.  The ping 
+ * node can then see how long the whole cycle took.
  */
 
 #include <SPI.h>
+#include "nRF24L01.h"
 #include "RF24.h"
 #include "printf.h"
 
@@ -20,34 +25,28 @@
 // Hardware configuration
 //
 
-// Set up nRF24L01 radio on SPI bus plus pins 9 & 10
+// Set up nRF24L01 radio on SPI bus plus pins 9 & 10 
 
-<<<<<<< HEAD
 RF24 radio(9,10);
-=======
-//RF24 radio(8,9);
-RF24 radio(22,23);
->>>>>>> 828add79a5375479cd29a7433c598b8ce56ee60b
 
-// sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
-// Leave open to be the 'ping' transmitter
-const int role_pin = 7;
+//add this for compatibility to Teensy3 and printf
+#if defined(__arm__) && defined(CORE_TEENSY)
+#define printf radio.kprintf
+#endif
+//end
 
 //
 // Topology
 //
 
 // Radio pipe addresses for the 2 nodes to communicate.
-const uint64_t pipes[2] = { 0xEEFDFDFDECLL, 0xEEFDFDF0DFLL };
+const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 
 //
 // Role management
 //
 // Set up role.  This sketch uses the same software for all the nodes
-// in this system.  Doing so greatly simplifies testing.  The hardware itself specifies
-// which node it is.
-//
-// This is done through the role_pin
+// in this system.  Doing so greatly simplifies testing.  
 //
 
 // The various roles supported by this sketch
@@ -57,44 +56,19 @@ typedef enum { role_ping_out = 1, role_pong_back } role_e;
 const char* role_friendly_name[] = { "invalid", "Ping out", "Pong back"};
 
 // The role of the current running sketch
-role_e role;
-
-//
-// Payload
-//
-
-const int min_payload_size = 1;
-const int max_payload_size = 32;
-const int payload_size_increments_by = 1;
-int next_payload_size = min_payload_size;
-
-char receive_payload[max_payload_size+1]; // +1 to allow room for a terminating NULL char
+role_e role = role_pong_back;
 
 void setup(void)
 {
-  //
-  // Role
-  //
-
-  // set up the role pin
-  pinMode(role_pin, INPUT);
-  digitalWrite(role_pin,HIGH);
-  delay(20); // Just to get a solid reading on the role pin
-
-  // read the address pin, establish our role
-  if ( digitalRead(role_pin) )
-    role = role_ping_out;
-  else
-    role = role_pong_back;
-
   //
   // Print preamble
   //
 
   Serial.begin(57600);
   printf_begin();
-  printf("\n\rRF24/examples/pingpair_dyn/\n\r");
+  printf("\n\rRF24/examples/GettingStarted/\n\r");
   printf("ROLE: %s\n\r",role_friendly_name[role]);
+  printf("*** PRESS 'T' to begin transmitting to the other node\n\r");
 
   //
   // Setup and configure rf radio
@@ -102,13 +76,12 @@ void setup(void)
 
   radio.begin();
 
-  // enable dynamic payloads
-  radio.setCRCLength( RF24_CRC_16 ) ;
-  radio.enableDynamicPayloads();
-
   // optionally, increase the delay between retries & # of retries
-  radio.setAutoAck( true ) ;
-  radio.setPALevel( RF24_PA_HIGH ) ;
+  radio.setRetries(15,15);
+
+  // optionally, reduce the payload size.  seems to
+  // improve reliability
+  //radio.setPayloadSize(8);
 
   //
   // Open pipes to other nodes for communication
@@ -119,15 +92,15 @@ void setup(void)
   // Open 'our' pipe for writing
   // Open the 'other' pipe for reading, in position #1 (we can have up to 5 pipes open for reading)
 
-  if ( role == role_ping_out )
+  //if ( role == role_ping_out )
   {
-    radio.openWritingPipe(pipes[0]);
+    //radio.openWritingPipe(pipes[0]);
     radio.openReadingPipe(1,pipes[1]);
   }
-  else
+  //else
   {
-    radio.openWritingPipe(pipes[1]);
-    radio.openReadingPipe(1,pipes[0]);
+    //radio.openWritingPipe(pipes[1]);
+    //radio.openReadingPipe(1,pipes[0]);
   }
 
   //
@@ -151,24 +124,27 @@ void loop(void)
 
   if (role == role_ping_out)
   {
-    // The payload will always be the same, what will change is how much of it we send.
-    static char send_payload[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ789012";
-
     // First, stop listening so we can talk.
     radio.stopListening();
 
     // Take the time, and send it.  This will block until complete
-    printf("Now sending length %i...",next_payload_size);
-    radio.write( send_payload, next_payload_size, false );
+    unsigned long time = millis();
+    printf("Now sending %lu...",time);
+    bool ok = radio.write( &time, sizeof(unsigned long) );
+    
+    if (ok)
+      printf("ok...");
+    else
+      printf("failed.\n\r");
 
     // Now, continue listening
     radio.startListening();
 
-    // Wait here until we get a response, or timeout
+    // Wait here until we get a response, or timeout (250ms)
     unsigned long started_waiting_at = millis();
     bool timeout = false;
     while ( ! radio.available() && ! timeout )
-      if (millis() - started_waiting_at > 1 + radio.getMaxTimeout()/1000 )
+      if (millis() - started_waiting_at > 200 )
         timeout = true;
 
     // Describe the results
@@ -179,20 +155,12 @@ void loop(void)
     else
     {
       // Grab the response, compare, and send to debugging spew
-      uint8_t len = radio.getDynamicPayloadSize();
-      radio.read( receive_payload, len );
-
-      // Put a zero at the end for easy printing
-      receive_payload[len] = 0;
+      unsigned long got_time;
+      radio.read( &got_time, sizeof(unsigned long) );
 
       // Spew it
-      printf("Got response size=%i value=%s\n\r",len,receive_payload);
+      printf("Got response %lu, round-trip delay: %lu\n\r",got_time,millis()-got_time);
     }
-    
-    // Update size for next time.
-    next_payload_size += payload_size_increments_by;
-    if ( next_payload_size > max_payload_size )
-      next_payload_size = min_payload_size;
 
     // Try again 1s later
     delay(1000);
@@ -208,30 +176,57 @@ void loop(void)
     if ( radio.available() )
     {
       // Dump the payloads until we've gotten everything
-      uint8_t len;
+      unsigned long got_time;
       bool done = false;
       while (!done)
       {
         // Fetch the payload, and see if this was the last one.
-	len = radio.getDynamicPayloadSize();
-	done = radio.read( receive_payload, len );
+        done = radio.read( &got_time, sizeof(unsigned long) );
 
-	// Put a zero at the end for easy printing
-	receive_payload[len] = 0;
+        // Spew it
+        printf("Got payload %lu...",got_time);
 
-	// Spew it
-	printf("Got payload size=%i value=%s\n\r",len,receive_payload);
+	// Delay just a little bit to let the other unit
+	// make the transition to receiver
+	delay(20);
       }
 
       // First, stop listening so we can talk
       radio.stopListening();
 
       // Send the final one back.
-      radio.write( receive_payload, len );
+      radio.write( &got_time, sizeof(unsigned long) );
       printf("Sent response.\n\r");
 
       // Now, resume listening so we catch the next packets.
       radio.startListening();
+    }
+  }
+
+  //
+  // Change roles
+  //
+
+  if ( Serial.available() )
+  {
+    char c = toupper(Serial.read());
+    if ( c == 'T' && role == role_pong_back )
+    {
+      printf("*** CHANGING TO TRANSMIT ROLE -- PRESS 'R' TO SWITCH BACK\n\r");
+
+      // Become the primary transmitter (ping out)
+      role = role_ping_out;
+      radio.openWritingPipe(pipes[0]);
+      radio.openReadingPipe(1,pipes[1]);
+    }
+    else if ( c == 'R' && role == role_ping_out )
+    {
+      printf("*** CHANGING TO RECEIVE ROLE -- PRESS 'T' TO SWITCH BACK\n\r");
+      
+      // Become the primary receiver (pong back)
+      role = role_pong_back;
+      radio.openWritingPipe(pipes[1]);
+      radio.openReadingPipe(1,pipes[0]);
     }
   }
 }

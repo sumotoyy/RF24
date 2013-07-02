@@ -55,7 +55,7 @@ turning this off will save a lot of ram/eeprom but you cannot debug anymore
 	#if !defined(NATIVE) && defined(ARDUINO)
 		#undef PROGMEM
 		#if defined(TEENSY3X)
-			#define PROGMEM __attribute__(( section(".data") ))
+			//#define PROGMEM __attribute__(( section(".data") ))
 		#else
 			#define PROGMEM __attribute__(( section(".progmem.data") ))
 		#endif
@@ -73,14 +73,14 @@ turning this off will save a lot of ram/eeprom but you cannot debug anymore
 // Progmem is Arduino-specific
 #if defined(TEENSY3X)
 	//typedef char const char;
-	//typedef uint16_t prog_uint16_t;
+	typedef uint16_t prog_uint16_t;
 	#ifdef PRINTFENABLED
 		#define PSTR(x) (x)
 		#define printf_P kprintf
 	#endif
 	#define strlen_P strlen
 	//#define PROGMEM
-	#define pgm_read_word(p) (*(p)) 
+	//#define pgm_read_word(p) (*(p)) 
 	#define PRIPSTR "%s"
 #elif defined(ARDUINO)
 	#include <avr/pgmspace.h>

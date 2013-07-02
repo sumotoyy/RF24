@@ -28,6 +28,12 @@
 
 RF24 radio(9,10);
 
+//add this for compatibility to Teensy3 and printf
+#if defined(__arm__) && defined(CORE_TEENSY)
+#define printf radio.kprintf
+#endif
+//end
+
 //
 // Payload
 //

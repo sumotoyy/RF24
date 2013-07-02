@@ -54,14 +54,7 @@ private:
   bool dynamic_payloads_enabled; /**< Whether dynamic payloads are enabled. */ 
   uint8_t ack_payload_length; /**< Dynamic size of pending ack payload. */
   uint64_t pipe0_reading_address; /**< Last address set on pipe 0 for reading. */
-  #if defined(TEENSY3X)
-  int kprintf(char *format, ...);
-/*
-  #ifdef PRINTFENABLED
-  char kkbuf[128];
-  #endif
-*/
-  #endif
+
 protected:
   /**
    * @name Low-level internal interface.
@@ -226,6 +219,9 @@ protected:
   /**@}*/
 
 public:
+  #if defined(TEENSY3X)
+  int kprintf(char *format, ...);
+  #endif
   /**
    * @name Primary public interface
    *

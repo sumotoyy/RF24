@@ -37,6 +37,12 @@
 
 RF24 radio(9,10);
 
+//add this for compatibility to Teensy3 and printf
+#if defined(__arm__) && defined(CORE_TEENSY)
+#define printf radio.kprintf
+#endif
+//end
+
 // sets the role of this unit in hardware.  Connect to GND to be the 'led' board receiver
 // Leave open to be the 'remote' transmitter
 const int role_pin = A4;

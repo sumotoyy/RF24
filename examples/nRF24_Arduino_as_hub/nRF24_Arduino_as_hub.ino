@@ -31,6 +31,12 @@ LiquidCrystal lcd(10, 7, 3, 4, 5, 6);
 
 RF24 radio(8,9);
 
+//add this for compatibility to Teensy3 and printf
+#if defined(__arm__) && defined(CORE_TEENSY)
+#define printf radio.kprintf
+#endif
+//end
+
 // Radio pipe addresses for the 2 nodes to communicate.
 //const uint64_t pipes[6] = { 0xF0F0F0F0D2LL, 0xF0F0F0F0E1LL, 0xF0F0F0F0E2LL, 0xF0F0F0F0E3LL, 0xF0F0F0F0E4LL, 0xF0F0F0F0E5LL };
 // bytes serv1 = 0x7365727631 in hex 

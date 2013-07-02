@@ -4,8 +4,10 @@
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
+ This version has been modified for compatibility with Teensy3.
+ Should work as is with arduino.
  */
- 
+
 /**
  * @file printf.h
  *
@@ -16,26 +18,33 @@
 #ifndef __PRINTF_H__
 #define __PRINTF_H__
 
-<<<<<<< HEAD
-#ifdef ARDUINO
-=======
-#include <Arduino.h>
->>>>>>> 828add79a5375479cd29a7433c598b8ce56ee60b
+#define PRINTFENABLED
 
-int serial_putc( char c, FILE * ) 
-{
-  Serial.write( c );
+#if defined(__arm__) && defined(CORE_TEENSY)
 
+void printf_begin(void){
+}
+
+#elif defined ARDUINO
+
+int serial_putc(char c, FILE *){
+#ifdef PRINTFENABLED
+  Serial.write(c);
   return c;
+#else
+  return 0;
+#endif
 } 
 
-void printf_begin(void)
-{
-  fdevopen( &serial_putc, 0 );
+void printf_begin(void){
+#ifdef PRINTFENABLED
+  fdevopen(&serial_putc,0);
+#endif
 }
 
 #else
-#error This example is only for use on Arduino.
+#error This example is only for use on Arduino and Teensy3.
 #endif // ARDUINO
 
 #endif // __PRINTF_H__
+

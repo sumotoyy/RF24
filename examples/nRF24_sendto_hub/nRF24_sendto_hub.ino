@@ -39,6 +39,13 @@ LiquidCrystal lcd(10, 7, 3, 4, 5, 6);
 // Set up nRF24L01 radio on SPI pin for CE, CSN
 RF24 radio(8,9);
 
+//add this for compatibility to Teensy3 and printf
+#if defined(__arm__) && defined(CORE_TEENSY)
+#define printf radio.kprintf
+#endif
+//end
+
+
 // For best performance, use P1-P5 for writing and Pipe0 for reading as per the hub setting
 // Below is the settings from the hub/receiver listening to P0 to P5
 //const uint64_t pipes[6] = { 0x7365727631LL, 0xF0F0F0F0E1LL, 0xF0F0F0F0E2LL, 0xF0F0F0F0E3LL, 0xF0F0F0F0E4LL, 0xF0F0F0F0E5LL };

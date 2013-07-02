@@ -172,7 +172,10 @@ uint8_t RF24::get_status(void){
 
 void RF24::print_status(uint8_t status){
 #ifdef PRINTFENABLED
-	printf_P(PSTR("STATUS\t\t = 0x%02x RX_DR=%x TX_DS=%x MAX_RT=%x RX_P_NO=%x TX_FULL=%x\r\n"),status,(status & _BV(RX_DR))?1:0,(status & _BV(TX_DS))?1:0,
+	printf_P(PSTR("STATUS\t\t = 0x%02x RX_DR=%x TX_DS=%x MAX_RT=%x RX_P_NO=%x TX_FULL=%x\r\n"),
+			status,
+			(status & _BV(RX_DR))?1:0,
+			(status & _BV(TX_DS))?1:0,
            (status & _BV(MAX_RT))?1:0,
            ((status >> RX_P_NO) & B111),
            (status & _BV(TX_FULL))?1:0
@@ -193,7 +196,8 @@ void RF24::print_observe_tx(uint8_t value){
 void RF24::print_byte_register(const char* name, uint8_t reg, uint8_t qty){
 #ifdef PRINTFENABLED
 	char extra_tab = strlen_P(name) < 8 ? '\t' : 0;
-	printf_P(PSTR(PRIPSTR"\t%c ="),name,extra_tab);
+	printf_P(PSTR(PRIPSTR"\t%c "),name,extra_tab);
+	printf_P(PSTR("="));
 	while (qty--){
 		printf_P(PSTR(" 0x%02x"),read_register(reg++));
 	}
@@ -206,7 +210,8 @@ void RF24::print_byte_register(const char* name, uint8_t reg, uint8_t qty){
 void RF24::print_address_register(const char* name, uint8_t reg, uint8_t qty){
 #ifdef PRINTFENABLED
 	char extra_tab = strlen_P(name) < 8 ? '\t' : 0;
-	printf_P(PSTR(PRIPSTR"\t%c ="),name,extra_tab);
+	printf_P(PSTR(PRIPSTR"\t%c "),name,extra_tab);
+	printf_P(PSTR("="));
 	while (qty--) {
 		uint8_t buffer[5];
 		read_register(reg++,buffer,sizeof buffer);
@@ -260,13 +265,16 @@ uint8_t RF24::getPayloadSize(void){
 	static const char rf24_datarate_e_str_1[] = "2MBPS";
 	static const char rf24_datarate_e_str_2[] = "250KBPS";
 	static const char * const rf24_datarate_e_str_P[] = {rf24_datarate_e_str_0,rf24_datarate_e_str_1,rf24_datarate_e_str_2};
+	
 	static const char rf24_model_e_str_0[] = "nRF24L01";
 	static const char rf24_model_e_str_1[] = "nRF24L01+";
 	static const char * const rf24_model_e_str_P[] = {rf24_model_e_str_0,rf24_model_e_str_1};
+	
 	static const char rf24_crclength_e_str_0[] = "Disabled";
 	static const char rf24_crclength_e_str_1[] = "8 bits";
 	static const char rf24_crclength_e_str_2[] = "16 bits" ;
 	static const char * const rf24_crclength_e_str_P[] = {rf24_crclength_e_str_0,rf24_crclength_e_str_1,rf24_crclength_e_str_2};
+	
 	static const char rf24_pa_dbm_e_str_0[] = "PA_MIN";
 	static const char rf24_pa_dbm_e_str_1[] = "PA_LOW";
 	static const char rf24_pa_dbm_e_str_2[] = "PA_HIGH";
@@ -277,13 +285,16 @@ uint8_t RF24::getPayloadSize(void){
 	static const char rf24_datarate_e_str_1[] PROGMEM = "2MBPS";
 	static const char rf24_datarate_e_str_2[] PROGMEM = "250KBPS";
 	static const char * const rf24_datarate_e_str_P[] PROGMEM = {rf24_datarate_e_str_0,rf24_datarate_e_str_1,rf24_datarate_e_str_2};
+	
 	static const char rf24_model_e_str_0[] PROGMEM = "nRF24L01";
 	static const char rf24_model_e_str_1[] PROGMEM = "nRF24L01+";
 	static const char * const rf24_model_e_str_P[] PROGMEM = {rf24_model_e_str_0,rf24_model_e_str_1};
+	
 	static const char rf24_crclength_e_str_0[] PROGMEM = "Disabled";
 	static const char rf24_crclength_e_str_1[] PROGMEM = "8 bits";
 	static const char rf24_crclength_e_str_2[] PROGMEM = "16 bits" ;
 	static const char * const rf24_crclength_e_str_P[] PROGMEM = {rf24_crclength_e_str_0,rf24_crclength_e_str_1,rf24_crclength_e_str_2};
+	
 	static const char rf24_pa_dbm_e_str_0[] PROGMEM = "PA_MIN";
 	static const char rf24_pa_dbm_e_str_1[] PROGMEM = "PA_LOW";
 	static const char rf24_pa_dbm_e_str_2[] PROGMEM = "PA_HIGH";
@@ -294,11 +305,11 @@ uint8_t RF24::getPayloadSize(void){
 
 void RF24::printDetails(void){
 #ifdef PRINTFENABLED
-	print_status(get_status());
+	print_status(get_status());//ok
 	print_address_register(PSTR("RX_ADDR_P0-1"),RX_ADDR_P0,2);
-	print_byte_register(PSTR("RX_ADDR_P2-5"),RX_ADDR_P2,4);
+	print_byte_register(PSTR("RX_ADDR_P2-5"),RX_ADDR_P2,4); 
 	print_address_register(PSTR("TX_ADDR"),TX_ADDR);
-	print_byte_register(PSTR("RX_PW_P0-6"),RX_PW_P0,6);
+	print_byte_register(PSTR("RX_PW_P0-6"),RX_PW_P0,6);	
 	print_byte_register(PSTR("EN_AA"),EN_AA);
 	print_byte_register(PSTR("EN_RXADDR"),EN_RXADDR);
 	print_byte_register(PSTR("RF_CH"),RF_CH);
@@ -306,10 +317,10 @@ void RF24::printDetails(void){
 	print_byte_register(PSTR("CONFIG"),CONFIG);
 	print_byte_register(PSTR("DYNPD/FEATURE"),DYNPD,2);
 #if defined(TEENSY3X)
-	printf_P(PSTR("Data Rate\t = %S\r\n"),rf24_datarate_e_str_P[getDataRate()]);
-	printf_P(PSTR("Model\t\t = %S\r\n"),rf24_model_e_str_P[isPVariant()]);
-	printf_P(PSTR("CRC Length\t = %S\r\n"),rf24_crclength_e_str_P[getCRCLength()]);
-	printf_P(PSTR("PA Power\t = %S\r\n"),rf24_pa_dbm_e_str_P[getPALevel()]);
+	printf_P(PSTR("Data Rate\t = %s\r\n"),rf24_datarate_e_str_P[getDataRate()]);
+	printf_P(PSTR("Model\t\t = %s\r\n"),rf24_model_e_str_P[isPVariant()]);
+	printf_P(PSTR("CRC Length\t = %s\r\n"),rf24_crclength_e_str_P[getCRCLength()]);
+	printf_P(PSTR("PA Power\t = %s\r\n"),rf24_pa_dbm_e_str_P[getPALevel()]);
 #else
 	printf_P(PSTR("Data Rate\t = %S\r\n"),pgm_read_word(&rf24_datarate_e_str_P[getDataRate()]));
 	printf_P(PSTR("Model\t\t = %S\r\n"),pgm_read_word(&rf24_model_e_str_P[isPVariant()]));
@@ -421,7 +432,7 @@ bool RF24::write(const void* buf, uint8_t len, const bool multicast){
 	do{
 		status = read_register(OBSERVE_TX,&observe_tx,1);
 		#ifdef PRINTFENABLED
-		IF_SERIAL_DEBUG(Serial.print(observe_tx,HEX));
+			IF_SERIAL_DEBUG(Serial.print(observe_tx,HEX));
 		#endif
 	}
 	while(!(status & (_BV(TX_DS) | _BV(MAX_RT))) && (micros() - sent_at < timeout));
@@ -438,14 +449,14 @@ bool RF24::write(const void* buf, uint8_t len, const bool multicast){
 	whatHappened(tx_ok,tx_fail,ack_payload_available);
 	result = tx_ok;
 	#ifdef PRINTFENABLED
-	IF_SERIAL_DEBUG(Serial.print(result?"...OK.":"...Failed"));
+		IF_SERIAL_DEBUG(Serial.print(result?"...OK.":"...Failed"));
 	#endif
   // Handle the ack packet
 	if (ack_payload_available){
 		ack_payload_length = getDynamicPayloadSize();
 		#ifdef PRINTFENABLED
-		IF_SERIAL_DEBUG(Serial.print("[AckPacket]/"));
-		IF_SERIAL_DEBUG(Serial.println(ack_payload_length,DEC));
+			IF_SERIAL_DEBUG(Serial.print("[AckPacket]/"));
+			IF_SERIAL_DEBUG(Serial.println(ack_payload_length,DEC));
 		#endif
 	}
 	return result;
@@ -552,13 +563,13 @@ void RF24::openReadingPipe(uint8_t child, uint64_t address){
 		#if defined(TEENSY3X)
 			write_register(child_pipe[child],reinterpret_cast<const uint8_t* > (&address),5);
 		#else
-			write_register(pgm_read_byte(&child_pipe[child]), reinterpret_cast<const uint8_t*>(&address),5);
+			write_register(pgm_read_byte(&child_pipe[child]),reinterpret_cast < const uint8_t* > (&address),5);
 		#endif
 		} else {
 		#if defined(TEENSY3X)
 			write_register(child_pipe[child],reinterpret_cast < const uint8_t* > (&address),1);
 		#else
-			write_register(pgm_read_byte(&child_pipe[child]), reinterpret_cast<const uint8_t*>(&address),1);
+			write_register(pgm_read_byte(&child_pipe[child]),reinterpret_cast < const uint8_t* > (&address),1);
 		#endif
 		}
 		#if defined(TEENSY3X)
@@ -607,7 +618,7 @@ void RF24::enableDynamicPayloads(void){
 		write_register(FEATURE,read_register(FEATURE) | _BV(EN_DPL));
 	}
 	#ifdef PRINTFENABLED
-	IF_SERIAL_DEBUG(printf("FEATURE=%i\r\n",read_register(FEATURE)));
+		IF_SERIAL_DEBUG(printf("FEATURE=%i\r\n",read_register(FEATURE)));
 	#endif
   // Enable dynamic payload on all pipes
   //
@@ -671,9 +682,9 @@ bool RF24::isPVariant(void){
 
 void RF24::setAutoAck(bool enable){
 	if (enable){
-		write_register(EN_AA, B111111);
+		write_register(EN_AA,B111111);
 	} else {
-		write_register(EN_AA, 0);
+		write_register(EN_AA,0);
 	}
 }
 
@@ -687,7 +698,7 @@ void RF24::setAutoAck(uint8_t pipe, bool enable){
 		} else {
 			en_aa &= ~_BV(pipe);
 		}
-		write_register( EN_AA, en_aa );
+		write_register(EN_AA, en_aa);
 	}
 }
 
@@ -826,7 +837,7 @@ rf24_crclength_e RF24::getCRCLength(void){
 
 void RF24::disableCRC(void){
 	uint8_t disable = read_register(CONFIG) & ~_BV(EN_CRC);
-	write_register(CONFIG, disable);
+	write_register(CONFIG,disable);
 }
 
 /****************************************************************************/
@@ -856,25 +867,24 @@ http://forum.pjrc.com/threads/23874-My-Kingdom-for-printf%28%29?highlight=printf
 */
 
 #if defined(TEENSY3X)
+
 int RF24::kprintf(char *format, ...)  {
 #ifdef PRINTFENABLED
-
-  int n;
-  char buf[128];
+	const uint8_t bsize = 128;
+	char buf[bsize];
+	int n;
     va_list args;
-    va_start (args, format);
-    //vsnprintf(buf, sizeof(buf), format, args); // does not overrun sizeof(buf) including null terminator
-	vsniprintf(buf, sizeof(buf), format, args); // does not overrun sizeof(buf) including null terminator
+    va_start(args,format);
+    //vsnprintf(buf,bsize,format, args); // does not overrun sizeof(buf) including null terminator
+	vsniprintf(buf,bsize,format, args); // does not overrun sizeof(buf) including null terminator
     va_end (args);
     // the below assumes that the new data will fit into the I/O buffer. If not, Serial may drop it.
     // if Serial had a get free buffer count, we could delay and retry. Such does exist at the device class level, but not at this level.
     n = strlen(buf) - Serial.print(buf); // move chars to I/O buffer, freeing up local buf
-
-  return n; // number of chars unable to fit in device I/O buffer (see bug notice above)
-
-  #else
+	return n; // number of chars unable to fit in device I/O buffer (see bug notice above)
+#else
   return 0;
-  #endif
+#endif
 }
 #endif
 // vim:ai:cin:sts=2 sw=2 ft=cpp
