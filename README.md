@@ -8,7 +8,19 @@ In the library config file there's an option for enable/disable all print featur
 Comment out will disable all printouts from library in arduino and teensy.
 Modified a little bit the original maniacsbug examples to ensure compatibility with Teensy3. The printf.h file included
 in every example has changed and the original example just need this line added:
+<code>
 
+RF24 radio(9,10);
+
+//add this for compatibility to Teensy3 and printf
+#if defined(__arm__) && defined(CORE_TEENSY)
+#define printf radio.kprintf
+#endif
+//end
+
+</code>
+Notice that if you instance the library differently (es. <code> RF24 wifi(9,10); </code>) you need to modify the line
+<code>#define printf radio.kprintf</code> accordly. Like <code>#define printf wifi.kprintf</code>
 
 This is needed just for printf, if you don't use printf in your code the library works as is, yust remember to comment out
 <code>#define PRINTFENABLED</code> in library config file to save a lot of space/ram.
