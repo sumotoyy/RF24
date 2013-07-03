@@ -219,7 +219,7 @@ protected:
   /**@}*/
 
 public:
-  #if defined(TEENSY3X)
+  #if defined(TEENSY3X) || defined(ARDUE)
   int kprintf(char *format, ...);
   #endif
   /**

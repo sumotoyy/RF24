@@ -20,19 +20,18 @@ void RF24::csn(int mode){
   // If we assume 2Mbs data rate and 16Mhz clock, a
   // divider of 4 is the minimum we want.
   // CLK:BUS 8Mhz:2Mhz, 16Mhz:4Mhz, or 20Mhz:5Mhz
-#if defined(TEENSY3X)
-	SPI.setBitOrder(MSBFIRST);
+  	SPI.setBitOrder(MSBFIRST);
 	SPI.setDataMode(SPI_MODE0);
+#if defined(TEENSY3X)//ditto
 	SPI.setClockDivider(SPI_CLOCK_DIV4);
 	digitalWriteFast(csn_pin,mode);
-#elif defined(ARDUINO)
-	SPI.setBitOrder(MSBFIRST);
-	SPI.setDataMode(SPI_MODE0);
+#elif defined(ARDUE)//due
+	SPI.setClockDivider(21);
+	digitalWrite(csn_pin,mode);
+#elif defined(ARDUINO) && !defined(__arm__)//all other arduinos
 	SPI.setClockDivider(SPI_CLOCK_DIV4);
 	digitalWrite(csn_pin,mode);
-#else
-	SPI.setBitOrder(MSBFIRST);
-	SPI.setDataMode(SPI_MODE0);
+#else//maple?
 	SPI.setClockDivider(SPI_CLOCK_DIV16);
 	digitalWriteFast(csn_pin,mode);
 #endif
@@ -176,9 +175,9 @@ void RF24::print_status(uint8_t status){
 			status,
 			(status & _BV(RX_DR))?1:0,
 			(status & _BV(TX_DS))?1:0,
-           (status & _BV(MAX_RT))?1:0,
-           ((status >> RX_P_NO) & B111),
-           (status & _BV(TX_FULL))?1:0
+            (status & _BV(MAX_RT))?1:0,
+            ((status >> RX_P_NO) & B111),
+            (status & _BV(TX_FULL))?1:0
           );
 #endif
 }
@@ -187,7 +186,8 @@ void RF24::print_status(uint8_t status){
 
 void RF24::print_observe_tx(uint8_t value){
 #ifdef PRINTFENABLED
-	printf_P(PSTR("OBSERVE_TX=%02x: POLS_CNT=%x ARC_CNT=%x\r\n"),value,(value >> PLOS_CNT) & B1111,(value >> ARC_CNT) & B1111);
+	printf_P(PSTR("OBSERVE_TX=%02x: POLS_CNT=%x ARC_CNT=%x\r\n"),
+	value,(value >> PLOS_CNT) & B1111,(value >> ARC_CNT) & B1111);
 #endif
 }
 
@@ -227,7 +227,10 @@ void RF24::print_address_register(const char* name, uint8_t reg, uint8_t qty){
 
 /****************************************************************************/
 
-RF24::RF24(uint8_t _cepin,uint8_t _cspin):ce_pin(_cepin),csn_pin(_cspin),wide_band(true),p_variant(false),payload_size(32),ack_payload_available(false),dynamic_payloads_enabled(false),pipe0_reading_address(0)
+RF24::RF24(uint8_t _cepin,uint8_t _cspin):
+ce_pin(_cepin),csn_pin(_cspin),wide_band(true),p_variant(false),
+payload_size(32),ack_payload_available(false),
+dynamic_payloads_enabled(false),pipe0_reading_address(0)
 {
 }
 
